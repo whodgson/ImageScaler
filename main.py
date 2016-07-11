@@ -5,7 +5,9 @@ import string
 import Tkinter
 import tkMessageBox
 import tkFileDialog 
+
 from Tkinter import *
+from PIL     import Image
 
 class ImageScaler(Tkinter.Tk):
     def __init__(self,parent):
@@ -48,7 +50,6 @@ class ImageScaler(Tkinter.Tk):
         #Create Scale Button
         self.scaleButton = Tkinter.Button(self,text=u"Scale Image",command=self.onScaleButtonClick)
         self.scaleButton.grid(column=2,row=3,columnspan=1,sticky="ew")
-        
         #Allow Column To Resize
         self.grid_columnconfigure(0,weight=1)
         #Disallow H Resize, Disallow V Resize
@@ -59,22 +60,28 @@ class ImageScaler(Tkinter.Tk):
         imageTypes = [("Image files",("*.png","*.jpg","*.jpeg","*.gif")), ("All files", "*")]
         fileDialog = tkFileDialog.Open(self, filetypes = imageTypes)
         fileName = fileDialog.show()
+        #Check If Any File Selected
         if fileName != '':
+            #Check If Image File Selected
             if fileName.lower().endswith((".png",".jpg",".jpeg",".gif")):
+                #Store File Directory
                 self.openVar.set(fileName)
                 self.fileSelected = True
             else:
                 self.showError("Invalid Filetype!")
                 self.fileSelected = False
         else:
+            #Clear File Directory
             self.openVar.set("No File Selected")
             self.fileSelected = False
             
     def onScaleButtonClick(self):
+        #Check If Valid Image Directory Selected
         if(self.fileSelected):
             print "Working"
         else:
             self.showError("No File Selected!")
+        #Clear File Directory
         self.fileSelected = False
         
     def showError(self, message):
