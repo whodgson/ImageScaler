@@ -11,4 +11,4 @@ On confirmation, the newly resized image will **overwrite** the original image f
 
 ## Acknowledgements
 
-Special thanks to those maintaining the fork of the *Python Image Library* 'Pillow', used by this utility to handle images.
+Special thanks to those maintaining the fork of the *Python Image Library* - **Pillow**, used by this utility to handle images.
