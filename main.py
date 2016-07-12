@@ -34,22 +34,37 @@ class ImageScaler(Tkinter.Tk):
         self.openVar.set("No File Selected")
         self.openLabel = Tkinter.Label(self,textvariable=self.openVar,anchor="c",bg="gray")
         self.openLabel.grid(column=1,row=1,columnspan=2,sticky="ew")
+        #Create Info Label 1
+        self.infoVar1   = Tkinter.StringVar()
+        self.infoVar1.set("")
+        self.infoLabel1 = Tkinter.Label(self,textvariable=self.infoVar1,anchor="c",bg="gray")
+        self.infoLabel1.grid(column=1,row=2,columnspan=2,sticky="ew")
+        #Create Info Label 2
+        self.infoVar2   = Tkinter.StringVar()
+        self.infoVar2.set("")
+        self.infoLabel2 = Tkinter.Label(self,textvariable=self.infoVar2,anchor="c",bg="gray")
+        self.infoLabel2.grid(column=1,row=3,columnspan=2,sticky="ew")
+        #Create Info Label 3
+        self.infoVar3   = Tkinter.StringVar()
+        self.infoVar3.set("")
+        self.infoLabel3 = Tkinter.Label(self,textvariable=self.infoVar3,anchor="c",bg="gray")
+        self.infoLabel3.grid(column=1,row=4,columnspan=2,sticky="ew")
         #Create Configure Label
         self.configureLabel = Tkinter.Label(self,anchor="c",text="Configure",fg="white",bg="blue")
-        self.configureLabel.grid(column=0,row=2,columnspan=3,sticky="ew")
+        self.configureLabel.grid(column=0,row=5,columnspan=3,sticky="ew")
         #Create Scale Label
         self.scaleLabel = Tkinter.Label(self,anchor="c",text="Scale Factor")
-        self.scaleLabel.grid(column=0,row=3,columnspan=1,sticky="ew")
+        self.scaleLabel.grid(column=0,row=6,columnspan=1,sticky="ew")
         #Create Scale Entry
         self.scaleList = [25,50,75]
         self.scaleVar  = Tkinter.IntVar()
         self.scaleVar.set(50)
         self.scaleMenu = Tkinter.OptionMenu(self,self.scaleVar,*self.scaleList)
         self.scaleMenu.config(width=20)
-        self.scaleMenu.grid(column=1,row=3,stick="ew")
+        self.scaleMenu.grid(column=1,row=6,stick="ew")
         #Create Scale Button
         self.scaleButton = Tkinter.Button(self,text=u"Scale Image",command=self.onScaleButtonClick)
-        self.scaleButton.grid(column=2,row=3,columnspan=1,sticky="ew")
+        self.scaleButton.grid(column=2,row=6,columnspan=1,sticky="ew")
         #Allow Column To Resize
         self.grid_columnconfigure(0,weight=1)
         #Disallow H Resize, Disallow V Resize
@@ -66,26 +81,81 @@ class ImageScaler(Tkinter.Tk):
             if fileName.lower().endswith((".png",".jpg",".jpeg",".gif")):
                 #Store File Directory
                 self.openVar.set(fileName)
+                self.setFileInfo()
                 self.fileSelected = True
             else:
                 self.showError("Invalid Filetype!")
                 self.fileSelected = False
+                self.clearFileInfo()
         else:
             #Clear File Directory
             self.openVar.set("No File Selected")
             self.fileSelected = False
+            #Clear File Info
+            self.clearFileInfo()
             
     def onScaleButtonClick(self):
         #Check If Valid Image Directory Selected
         if(self.fileSelected):
-            print "Working"
+            #Confirm File Overwrite
+            choice = tkMessageBox.askquestion("Save","Overwrite Existing Image With Scaled Version?",icon="warning")
+            if choice == "yes":
+                #Rescale File
+                image = self.scaleFile()
+                #Overwrite Selected File With Existing File
+                self.saveFile(image)
+            else:
+                #Cancel Scale Operation
+                self.showInfo("Scale Operation Cancelled!")
+                return  
         else:
             self.showError("No File Selected!")
+            
         #Clear File Directory
+        self.openVar.set("No File Selected")
         self.fileSelected = False
+        #Reset File Info
+        self.clearFileInfo()
+     
+    def scaleFile(self):
+        #Get File And Size Information
+        image = Image.open(self.openVar.get())
+        size  = image.size
+        sizeX = size[0]
+        sizeY = size[1]
+        #Get Scale Factor And New Image Dimensions
+        scaleFactor = self.scaleVar.get()
+        newSizeX    = sizeX*(scaleFactor*0.01)
+        newSizeY    = sizeY*(scaleFactor*0.01)
+        newSize     = (newSizeX,newSizeY)
+        #Scale Image
+        image.thumbnail(newSize)
+        #Return Scaled Image
+        return image
+        
+    def saveFile(self, image):
+        try:
+            image.save(self.openVar.get())
+            self.showInfo("Image Save Successful!")
+        except IOError:
+            self.showError("Image Save Error!")
+        
+    def setFileInfo(self):
+        image = Image.open(self.openVar.get())
+        self.infoVar1.set(image.format)
+        self.infoVar2.set(image.size)
+        self.infoVar3.set(image.mode)
+    
+    def clearFileInfo(self):
+        self.infoVar1.set("")
+        self.infoVar2.set("")
+        self.infoVar3.set("")
         
     def showError(self, message):
-        tkMessageBox.showinfo("Error",message)
+        tkMessageBox.showerror("Error",message)
+        
+    def showInfo(self, message):
+        tkMessageBox.showinfo("Info",message)
         
 if __name__ == "__main__":
     app = ImageScaler(None)
