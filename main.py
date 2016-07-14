@@ -56,7 +56,7 @@ class ImageScaler(Tkinter.Tk):
         self.scaleLabel = Tkinter.Label(self,anchor="c",text="Scale Factor")
         self.scaleLabel.grid(column=0,row=6,columnspan=1,sticky="ew")
         #Create Scale Entry
-        self.scaleList = [25,50,75]
+        self.scaleList = [5,10,15,20,25,50,75]
         self.scaleVar  = Tkinter.IntVar()
         self.scaleVar.set(50)
         self.scaleMenu = Tkinter.OptionMenu(self,self.scaleVar,*self.scaleList)
@@ -102,19 +102,24 @@ class ImageScaler(Tkinter.Tk):
             if choice == "yes":
                 #Rescale File
                 image = self.scaleFile()
-                #Overwrite Selected File With Existing File
-                self.saveFile(image)
+                #Check Image Was Scaled Successfully
+                if image != None:
+                    #Overwrite Selected File With Existing File
+                    self.saveFile(image)
+                else:
+                    self.showError("Error During Image Scale!")
+                    return None
             else:
                 #Cancel Scale Operation
                 self.showInfo("Scale Operation Cancelled!")
-                return  
+                return None
         else:
             self.showError("No File Selected!")
             
         #Clear File Directory
-        self.openVar.set("No File Selected")
         self.fileSelected = False
-        #Reset File Info
+        #Reset File Infov
+        self.openVar.set("No File Selected")
         self.clearFileInfo()
      
     def scaleFile(self):
@@ -128,6 +133,10 @@ class ImageScaler(Tkinter.Tk):
         newSizeX    = sizeX*(scaleFactor*0.01)
         newSizeY    = sizeY*(scaleFactor*0.01)
         newSize     = (newSizeX,newSizeY)
+        #Check New Size Is Not Impossible
+        if newSizeX < 1 or newSizeY < 1:
+            self.showError("Cannot Scale That Small! \n(Width or Height Below One Pixel)")
+            return None
         #Scale Image
         image.thumbnail(newSize)
         #Return Scaled Image
@@ -136,9 +145,9 @@ class ImageScaler(Tkinter.Tk):
     def saveFile(self, image):
         try:
             image.save(self.openVar.get())
-            self.showInfo("Image Save Successful!")
+            self.showInfo("Saved Image Successfully!")
         except IOError:
-            self.showError("Image Save Error!")
+            self.showError("Error During Image Save!")
         
     def setFileInfo(self):
         image = Image.open(self.openVar.get())
